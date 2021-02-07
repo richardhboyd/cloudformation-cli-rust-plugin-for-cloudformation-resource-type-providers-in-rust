@@ -110,9 +110,76 @@ build the binary with
 ```
 cd rust_formation
 cargo build --release
+```
+
+Once it's built, we can zip up the binary (we've helpfully named it `bootstrap` so that we don't
+need to write a separate executable to invoke it).
+
+```
 zip -j rust.zip ./target/release/bootstrap
 ```
 
+
+## CloudFormation Resource Provider Details
+
+### Interface
+The only place I have found anything close to documentation for the shape of the request that your
+provider will receive and the expected response is in the Java implementation for the original rpdk.
+[Request](https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/HandlerRequest.java)
+and [Response](https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/ProgressEvent.java).
+
+For posteristy, I have documented them both here:
+
+#### Request
+```json
+  {
+    "action":"CREATE|READ|UPDATE|DELETE|LIST",
+    "awsAccountId": "String",
+    "bearerToken": "String",
+    "nextToken": "String",
+    "region": "String",
+    "resourceType": "String",
+    "resourceTypeVersion": "String",
+    "requestData": {
+      "callerCredentials": {
+        "accessKeyId": "String",
+        "secretAccessKey": "String",
+        "sessionToken": "String"
+      },
+      "providerCredentials": {
+        "accessKeyId": "String",
+        "secretAccessKey": "String",
+        "sessionToken": "String"
+      },
+      "providerLogGroupName": "String",
+      "logicalResourceId": "String",
+      "resourceProperties": {ResourceT},
+      "previousResourceProperties": {ResourceT},
+      "systemTags": Map<String, String>,
+      "previousSystemTags": Map<String, String>,
+      "stackTags": Map<String, String>,
+      "previousStackTags": Map<String, String>
+    },
+    "stackId": "String",
+    "callbackContext": {CallbackT},
+    "snapshotRequested": bool,
+    "rollback": "bool",
+    "requestContext": {RequestContext<CallbackT>}
+```
+
+#### Response
+```json
+  {
+    "status": {OperationStatus},
+    "errorCode": {HandlerErrorCode},
+    "message": "String",
+    "callbackContext": {CallbackT},
+    "callbackDelaySeconds": int,
+    "resourceModel": {ResourceT},
+    "resourceModels": [ResourceT],
+    "nextToken": "String"
+  }
+```
 
 ## Useful Links
 
