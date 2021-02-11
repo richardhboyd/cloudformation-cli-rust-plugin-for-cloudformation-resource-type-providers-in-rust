@@ -1,0 +1,18 @@
+{
+    "artifact_type": "RESOURCE",
+    "typeName": "rust::cloud9::environment",
+    "language": "provided.al2",
+    "runtime": "provided.al2",
+    "entrypoint": "does.not.matter",
+    "testEntrypoint": "does.not.matter",
+    "settings": {
+        "version": false,
+        "subparser_name": null,
+        "verbose": 0,
+        "force": false,
+        "type_name": null,
+        "artifact_type": null,
+        "use_docker": true,
+        "protocolVersion": "2.0.0"
+    }
+}

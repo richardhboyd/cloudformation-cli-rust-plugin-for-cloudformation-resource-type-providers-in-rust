@@ -1,0 +1,44 @@
+{
+    "action": "CREATE",
+    "awsAccountId": "026781393487",
+    "bearerToken": "ddb44a11-5575-fc60-21be-78ee7659a7d6",
+    "region": "us-west-2",
+    "responseEndpoint": null,
+    "nextToken": null,
+    "resourceType": "rust::cloud9::environment",
+    "resourceTypeVersion": "00000008",
+    "requestData": {
+        "logicalResourceId": "TypeFunction",
+        "resourceProperties": {
+            "EnvironmentOwner": "arn:aws:sts::026781393487:assumed-role/newRichardRole/rhboyd-Isengard",
+            "InstanceId": "i-XXXXXXXXXX",
+            "EnvironmentName": "MyRustyEnvironment"
+        },
+        "previousResourceProperties": null,
+        "typeConfiguration": null,
+        "callerCredentials": {
+            "accessKeyId": "ASIAQMPCLUJHXHP4MOHL",
+            "secretAccessKey": "mzGAy0tmYahZqgReiz5KWUNsx3T1xsb/x643iqAN",
+            "sessionToken": "FwoGZXIvYXdzEM7//////////wEaDLitEAZd+azz7q8dlyKoATi8y5AuySuXDpK9tJazx0HUHrpHpeknzid69SnER6XleoLlsYqCYwJU/nh2wt+VeulTGrUdKG3leLwT+Eqn0CSe4Kn1eo1OH87WYrFi+ppe+B5xwfWS26N6zeIL+vM7bFyNlmKmEcc4fK5lXYaJKgOsdjRjmgcepdtg4xmBKspMafjkkmfWWMk7WsOjOdC1MasytOv1VgEMa3GYOCGq5VOyYsjyXnKnEiiJ4JKBBjItfNutDsyUGDJ8aDTaUh3ocUkCV9sG0HQXsh2iUir15fys1fEapcrDwtC6BksC"
+        },
+        "providerCredentials": {
+            "accessKeyId": "ASIAQMPCLUJHXHP4MOHL",
+            "secretAccessKey": "mzGAy0tmYahZqgReiz5KWUNsx3T1xsb/x643iqAN",
+            "sessionToken": "FwoGZXIvYXdzEM7//////////wEaDLitEAZd+azz7q8dlyKoATi8y5AuySuXDpK9tJazx0HUHrpHpeknzid69SnER6XleoLlsYqCYwJU/nh2wt+VeulTGrUdKG3leLwT+Eqn0CSe4Kn1eo1OH87WYrFi+ppe+B5xwfWS26N6zeIL+vM7bFyNlmKmEcc4fK5lXYaJKgOsdjRjmgcepdtg4xmBKspMafjkkmfWWMk7WsOjOdC1MasytOv1VgEMa3GYOCGq5VOyYsjyXnKnEiiJ4JKBBjItfNutDsyUGDJ8aDTaUh3ocUkCV9sG0HQXsh2iUir15fys1fEapcrDwtC6BksC"
+        },
+        "providerLogGroupName": "alpha-cloud9-environment-logs",
+        "systemTags": {
+            "aws:cloudformation:stack-name": "loggertest0003",
+            "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-west-2:026781393487:stack/loggertest0006/8f677960-6aff-11eb-a5d7-02677f4e2fd8",
+            "aws:cloudformation:logical-id": "TypeFunction"
+        },
+        "previousSystemTags": null,
+        "stackTags": null,
+        "previousStackTags": null
+    },
+    "stackId": "arn:aws:cloudformation:us-west-2:026781393487:stack/loggertest0004/8f677960-6aff-11eb-a5d7-02677f4e2fd8",
+    "callbackContext": null,
+    "snapshotRequested": null,
+    "rollback": null,
+    "driftable": null
+}

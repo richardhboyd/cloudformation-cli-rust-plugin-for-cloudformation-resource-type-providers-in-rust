@@ -181,6 +181,32 @@ For posteristy, I have documented them both here:
   }
 ```
 
+### Testing
+Once the binary is built, we test it with these commands:
+
+```
+rm -rf ./rust.zip; \
+cargo build --release && \
+zip -j rust.zip ./target/release/bootstrap && \
+unzip -o \
+    rust.zip \
+    -d /tmp/lambda && \
+echo "$(cat test_inputs/handler.json)"|\
+docker run \
+    -i -e DOCKER_LAMBDA_USE_STDIN=1 \
+    --rm \
+    -v /tmp/lambda:/var/task \
+    lambci/lambda:provided.al2
+```
+
+Deploying to CFN
+```
+rm ./rust_cloud9_environment.zip;\
+mv projects/my_lambda_function/rust.zip extract/ResourceProvider.zip &&\
+zip -j -r rust_cloud9_environment.zip ./extract/. &&\
+aws s3 cp ./rust_cloud9_environment.zip s3://cloud9-ssh-resources-026781393487-us-west-2/resources/ &&\
+aws cloudformation register-type --logging-config LogRoleArn=arn:aws:iam::026781393487:role/alpha-cloud9-environment-role-stack-ExecutionRole-17YGGIY2OQSNU,LogGroupName=alpha-cloud9-environment-logs --type RESOURCE --type-name rust::cloud9::environment --schema-handler-package s3://cloud9-ssh-resources-026781393487-us-west-2/resources/rust_cloud9_environment.zip
+
 ## Useful Links
 
 - [AWS Lambda Rust Runtime](https://github.com/awslabs/aws-lambda-rust-runtime)

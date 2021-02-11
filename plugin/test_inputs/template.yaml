@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS SAM template for the rust::cloud9::environment resource type
+
+Resources:
+  MyRustEnvironment:
+    Type: rust::cloud9::environment
+    Properties:
+      EnvironmentOwner: "arn:aws:sts::026781393487:assumed-role/newRichardRole/rhboyd-Isengard"
+      InstanceId: 'i-XXXXXXXXXX'
+      EnvironmentName: "MyRustyEnvironment"

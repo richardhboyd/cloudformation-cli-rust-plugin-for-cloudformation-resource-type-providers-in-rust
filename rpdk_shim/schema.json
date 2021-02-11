@@ -1,0 +1,115 @@
+{
+    "typeName": "rust::cloud9::environment",
+    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+    "definitions": {
+        "Collaborators": {
+            "$comment": "List of Collaborators to share the environment with",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Collaborator"
+            },
+            "additionalProperties": false
+        },
+        "Collaborator": {
+            "type": "object",
+            "properties": {
+                "Arn": {
+                    "type": "string"
+                },
+                "Permissions": {
+                    "$ref": "#/definitions/CollaboratorPermission"
+                }
+            },
+            "additionalProperties": false
+        },
+        "CollaboratorPermission": {
+            "type": "string",
+            "description": "Permissions to apply to a collaborator.",
+            "default": "READ_ONLY",
+            "enum": [
+                "READ_ONLY",
+                "READ_WRITE"
+            ]
+        }
+    },
+    "properties": {
+        "EnvironmentOwner": {
+            "description": "IAM Principal that owns the Cloud9 Environment.",
+            "type": "string"
+        },
+        "Description": {
+            "description": "The description of the Cloud9 Environment.",
+            "type": "string",
+            "maxLength": 250
+        },
+        "InstanceId": {
+            "description": "The SSM Instance Id for the Cloud9 Environmnet to use",
+            "type": "string"
+        },
+        "Collaborators": {
+            "$ref": "#/definitions/Collaborators"
+        },
+        "Username": {
+            "description": "Username of the OS User on the EC2 Instance",
+            "type": "string",
+            "default": "ec2-user"
+        },
+        "EnvironmentName": {
+            "type": "string"
+        },
+        "EnvironmentId": {
+            "type": "string"
+        },
+        "Environment": {
+            "type": "string"
+        },
+        "Arn": {
+            "type": "string"
+        },
+        "NodeBinaryPath": {
+            "type": "string"
+        },
+        "EnvironmentPath": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "InstanceId",
+    ],
+    "readOnlyProperties": [
+        "/properties/EnvironmentId",
+        "/properties/Arn",
+    ],
+    "primaryIdentifier": [
+        "/properties/Environment"
+    ],
+    "handlers": {
+        "create": {
+            "permissions": [
+                "initech:CreateReport"
+            ]
+        },
+        "read": {
+            "permissions": [
+                "initech:DescribeReport"
+            ]
+        },
+        "update": {
+            "permissions": [
+                "initech:UpdateReport"
+            ]
+        },
+        "delete": {
+            "permissions": [
+                "initech:DeleteReport"
+            ]
+        },
+        "list": {
+            "permissions": [
+                "initech:ListReports"
+            ]
+        }
+    }
+}

@@ -1,0 +1,40 @@
+[package]
+name = "plugin"
+version = "0.1.0"
+authors = ["Richard Boyd <rhboyd@amazon.com>"]
+edition = "2018"
+autobins = false
+
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"
+
+[dependencies]
+lambda = { git = "https://github.com/awslabs/aws-lambda-rust-runtime.git"}
+aws-sigv4 = { git = "https://github.com/davidbarsky/sigv4.git"}
+serde = "1.0.82"
+serde_derive = "1.0.82"
+serde_json = { version = "1.0.33", features = ["raw_value"] }
+
+colored = "1.8"
+colored_json = "2.0"
+env_logger = "0.7"
+futures = "0.3"
+rusoto_core = "0.46"
+smallvec = "0.6"
+structopt = "0.3"
+url = "2.1"
+
+rusoto_logs = "0.46.0"
+rusoto_credential = "0.46.0"
+rusoto_signature = "0.46.0"
+http = "0.2"
+chrono = "0.4.19"
+
+tokio = { version = "1.0", features = ["full"] }
+
+# From David's Sigv4
+bytes = "1"
+hyper = { version = "0.14", features = ["http1", "client", "runtime"] }
+hyper-tls = "0.5"
+http-body = "0.4"
