@@ -5,6 +5,6 @@ Resources:
   MyRustEnvironment:
     Type: rust::cloud9::environment
     Properties:
-      EnvironmentOwner: "arn:aws:sts::026781393487:assumed-role/newRichardRole/rhboyd-Isengard"
+      # EnvironmentOwner: "arn:aws:sts::026781393487:assumed-role/newRichardRole/rhboyd-Isengard"
       InstanceId: 'i-XXXXXXXXXX'
-      EnvironmentName: "MyRustyEnvironment"
+      # EnvironmentName: "MyRustyEnvironmentCFN"

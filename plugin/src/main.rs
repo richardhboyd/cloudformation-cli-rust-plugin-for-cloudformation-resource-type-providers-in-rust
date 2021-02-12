@@ -25,7 +25,45 @@ fn reconstruct(req: Request<Bytes>) -> Request<Body> {
     Request::from_parts(headers, body)
 }
 
-async fn call_cloud_9(access_key: &str, secret_key: &str, security_token: &str, owner_arn: &str) -> Result<(), Error> {
+#[derive(Serialize, Deserialize, Debug, PartialEq, Default)]
+struct CreateEnvironmentEC2 {
+    name: String,
+    #[serde(default = "default_shutdown_timeout", rename = "automaticStopTimeMinutes")]
+    automatic_stop_time_minutes: i32,
+    
+    #[serde(rename = "ownerArn")]
+    owner_arn: String,
+    
+    #[serde(rename = "clientRequestToken", default = "client_request_token")]
+    client_request_token: String,
+    
+    #[serde(rename = "instanceType")]
+    instance_type: String,
+    
+    #[serde(rename = "ideTemplateId", default = "default_environment")]
+    ide_template_id: String,
+}
+
+fn client_request_token() -> String {
+    String::from("cloud9-console-a2450903-b63e-4033-ac0e-d15519af0e57")
+}
+
+fn default_shutdown_timeout() -> i32 {
+    30
+}
+
+fn default_environment() -> String {
+    String::from("f5ec09dc16f0a23728e3cfee668658e8")
+}
+
+async fn call_cloud_9(
+    access_key: &str,
+    secret_key: &str,
+    security_token: &str,
+    owner_arn: &str,
+    environment_name: &str,
+    bearer_token: &str,
+    ) -> Result<String, Error> {
     let https = hyper_tls::HttpsConnector::new();
     let client: Client<_, hyper::Body> = Client::builder().build(https);
     let uri =
@@ -40,24 +78,18 @@ async fn call_cloud_9(access_key: &str, secret_key: &str, security_token: &str, 
     headers.insert(header::HOST, "cloud9.amazonaws.com".parse()?);
     headers.insert(header::CONTENT_TYPE, "application/x-amz-json-1.1".parse()?);
     headers.insert(hdr, "AWSCloud9WorkspaceManagementService.CreateEnvironmentEC2".parse()?);
-    let s: String = format!("{{
-            \"name\":\"dddd\",
-            \"automaticStopTimeMinutes\":30,
-            \"ownerArn\": \"{}\",
-            \"clientRequestToken\": \"cloud9-console-a2450903-b63e-4033-ac0e-d15519af0d57\",
-            \"instanceType\":\"t3.small\",
-            \"ideTemplateId\":\"f5ec09dc16f0a23728e3cfee668658e8\"
-        }}", owner_arn).to_owned();
-    let s_slice: &str = &s[..];  // take a full slice of the string
-    let src3: &str = "{
-            \"name\":\"dddd\",
-            \"automaticStopTimeMinutes\":30,
-            \"ownerArn\": \"arn:aws:sts::026781393487:assumed-role/newRichardRole/rhboyd-Isengard\",
-            \"clientRequestToken\": \"cloud9-console-a2450903-b63e-4033-ac0e-d15519af0d57\",
-            \"instanceType\":\"t3.small\",
-            \"ideTemplateId\":\"f5ec09dc16f0a23728e3cfee668658e8\"
-        }";
-    let mut req = builder.body(Bytes::from(src3.as_bytes()))?;
+    // Panics w/ None. Find a fix.
+    
+    let data = serde_json::json!({
+        "name": environment_name,
+        "ownerArn": owner_arn,
+        "instanceType": "t3.small",
+        "clientRequestToken": bearer_token.to_string()
+    });
+    
+    let model: CreateEnvironmentEC2 = serde_json::from_value(data)?;
+    let x = serde_json::ser::to_string(&model).unwrap();
+    let mut req = builder.body(Bytes::from(x))?;
     let credentials = Sigv4Credentials {
         access_key: access_key.to_string(),
         secret_key: secret_key.to_string(),
@@ -71,16 +103,13 @@ async fn call_cloud_9(access_key: &str, secret_key: &str, security_token: &str, 
     while let Some(Ok(chunk)) = res.body_mut().data().await {
         body.extend_from_slice(&chunk);
     }
-    let s = match str::from_utf8(&body) {
+    let ss = match str::from_utf8(&body) {
         Ok(v) => v,
         Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
     };
+    println!("result: {}", &ss);
 
-    println!("result: {}", s);
-    // println!("{:?}", body);
-    
-
-    Ok(())
+    Ok(ss.to_string())
 }
 
 async fn do_step_1(client: CloudWatchLogsClient, log_group_name: &str) -> Result<(), Error> {
@@ -221,50 +250,54 @@ struct Credentials {
 
 #[derive(Default, Serialize, Deserialize, Clone, Debug)]
 struct ResourceModel {
-    #[serde(rename = "EnvironmentOwner")]
-    environment_owner: Option<String>,
-    #[serde(rename = "Description")]
-    description: Option<String>,
-    #[serde(rename = "InstanceId")]
-    instance_id: String,
-    #[serde(rename = "Username")]
-    #[serde(default = "default_username")]
-    username: String,
-    #[serde(rename = "EnvironmentName")]
-    environment_name: Option<String>,
     #[serde(rename = "EnvironmentId")]
     environment_id: Option<String>,
     #[serde(rename = "Environment")]
     environment_return_value: Option<String>,
+
+    // #[serde(rename = "EnvironmentOwner")]
+    // environment_owner: Option<String>,
+    #[serde(rename = "InstanceId")]
+    instance_id: String,
+    // #[serde(rename = "EnvironmentName")]
+    // environment_name: Option<String>,
+
     #[serde(rename = "Arn")]
     arn: Option<String>,
-    #[serde(rename = "NodeBinaryPath")]
-    #[serde(default = "default_node_binary_path")]
-    node_binary_path: String,
-    #[serde(rename = "EnvironmentPath")]
-    #[serde(default = "default_environment_path")]
-    environment_path: String,
+    
+    // #[serde(rename = "Description")]
+    // description: Option<String>,
+    // #[serde(rename = "Username")]
+    // #[serde(default = "default_username")]
+    // username: Option<String>,
+
+    // #[serde(rename = "NodeBinaryPath")]
+    // #[serde(default = "default_node_binary_path")]
+    // node_binary_path: String,
+    // #[serde(rename = "EnvironmentPath")]
+    // #[serde(default = "default_environment_path")]
+    // environment_path: String,
 }
 
-fn default_username() -> String {
-    String::from("ec2-user")
-}
+// fn default_username() -> String {
+//     String::from("ec2-user")
+// }
 
-fn default_node_binary_path() -> String {
-    String::from("/usr/bin/node")
-}
+// fn default_node_binary_path() -> String {
+//     String::from("/usr/bin/node")
+// }
 
-fn default_environment_path() -> String {
-    String::from("~/environment")
-}
+// fn default_environment_path() -> String {
+//     String::from("~/environment")
+// }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct Collaborator {
-    #[serde(rename = "Arn")]
-    arn: String,
-    #[serde(rename = "Permissions")]
-    permissions: String
-}
+// #[derive(Serialize, Deserialize, Clone, Debug)]
+// struct Collaborator {
+//     #[serde(rename = "Arn")]
+//     arn: String,
+//     #[serde(rename = "Permissions")]
+//     permissions: String
+// }
 
 #[derive(Serialize, Clone, Debug)]
 struct CustomOutput {
@@ -285,13 +318,13 @@ struct CustomOutput {
     
 }
 
-impl CustomOutput {
-    fn new(message: String, resource_model: ResourceModel, status: String) -> Self {
-        CustomOutput {
-            message, resource_model, status
-        }
-    }
-}
+// impl CustomOutput {
+//     fn new(message: String, resource_model: ResourceModel, status: String) -> Self {
+//         CustomOutput {
+//             message, resource_model, status
+//         }
+//     }
+// }
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -305,35 +338,55 @@ async fn my_handler(e: CustomEvent, _c: lambda::Context) -> Result<CustomOutput,
     let secret_access_key: String = e.request_data.provider_credentials.secret_access_key.clone();
     let session_token: String = e.request_data.provider_credentials.session_token.clone();
     let log_group_name: String = e.request_data.provider_log_group_name.clone();
-    // DANGER!!! This will fail if OwnerArn is not defined.
-    let owner_arn: String = e.request_data.resource_properties.environment_owner.clone().unwrap();
     let stack_id = e.stack_id.clone();
     let mut v: Vec<&str> = stack_id.split(':').collect();
     let log_stream_name: &str = v.pop().unwrap();
     let none: Option<i64> = None;
     let provider = StaticProvider::new(access_key_id.clone(), secret_access_key.clone(), Some(session_token.clone()), none);
     let input = String::from(e.action.clone());
+    send_to_cloudwatch(provider, &log_group_name, &log_stream_name, &String::from(format!("{:?}", e))).await?;
     match input {
         _ if input == "CREATE" => {
-            send_to_cloudwatch(provider, &log_group_name, &log_stream_name, &String::from(format!("{:?}", e))).await?;
-            call_cloud_9(&access_key_id, &secret_access_key, &session_token, &owner_arn).await?;
+            // // DANGER!!! This will fail if OwnerArn is not defined.
+            // let owner_arn: String = e.request_data.resource_properties.environment_owner.clone().unwrap();
+            // // DANGER!!! This will fail if EnvironmentName is not defined.
+            // let environment_name: String = e.request_data.resource_properties.environment_name.clone().unwrap();
+            // let bearer_token: String = e.bearer_token.clone();
+            
+            // if let Ok(ret) = call_cloud_9(&access_key_id, &secret_access_key, &session_token, &owner_arn, &environment_name, &bearer_token).await {
+            //     return Ok(CustomOutput {
+            //         message: format!("SUCCESS"),
+            //         resource_model: ResourceModel {
+            //             instance_id: format!("i-XXXXXXXXXX"),
+            //             arn: Some(format!("arn:aws:cloud9:us-west-2:000000000000:environment/myEnv")),
+            //             environment_id: Some(ret.clone()),
+            //             environment_return_value: Some(ret.clone()),
+            //             ..e.request_data.resource_properties
+            //         },
+            //         status: format!("SUCCESS")
+            //     });
+            // }
         },
         _ if input == "DELETE" => {
-            println!("DELETE Event");
+            return Ok(CustomOutput {
+                message: format!("SUCCESS"),
+                resource_model: ResourceModel {
+                    ..e.request_data.resource_properties
+                },
+                status: format!("SUCCESS")
+            });
         },
         _ => println!("Input does not equal any value"),
     }
-    
-
-    Ok(CustomOutput {
+    return Ok(CustomOutput {
         message: format!("SUCCESS"),
         resource_model: ResourceModel {
             instance_id: format!("i-XXXXXXXXXX"),
             arn: Some(format!("arn:aws:cloud9:us-west-2:000000000000:environment/myEnv")),
-            environment_id: Some(format!("AAAA00000000-0000")),
-            environment_return_value: Some(format!("AAAA00000000-0000")),
-            ..Default::default()
+            environment_id: Some(format!("XXXXXXXXXXXXXX")),
+            environment_return_value: Some(format!("XXXXXXXXXXXXXX")),
+            ..e.request_data.resource_properties
         },
         status: format!("SUCCESS")
-    })
+    });
 }
